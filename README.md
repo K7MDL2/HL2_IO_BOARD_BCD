@@ -17,3 +17,23 @@ In this version the BCD will only match the TX frequency as I found most SDR app
 
 The Thetis tutorial is here:
 https://github.com/K7MDL2/HL2_IO_BOARD_BCD/wiki/Thetis-Configuration-for-Transverters-with-Split-IF
+
+
+## Arduino IDE option
+
+On the original repo there are several user solutions added since I built this C version.  
+
+One of then is ZL2TE_Arduino.  As of Feb 2026 I was able to compile and run with 1 change to a header file to fix a path to an include file.  I used Arduino IDE v2.3.7 and the current ARduino-Pico board package which includes Pico-SDK 2.2.0.
+
+In the file ioboard.h replace this line 
+#include <pico/i2c_slave.h>
+With this line
+#include <../../pico_i2c_slave/include/pico/i2c_slave.h>
+
+It should now compile adn produce a UF2 image file.
+
+I added my VHF band code to ZL2TE_Arduino.ino.  There is now a #define to choose the original HF band decoder and my VHF bands decoder.
+
+#define VHF_BANDS   // use VHF bands instead of HF.
+
+I have my edited version of tha file in a zip
