@@ -36,4 +36,4 @@ I added my VHF band code to ZL2TE_Arduino.ino.  There is now a #define to choose
 
 #define VHF_BANDS   // use VHF bands instead of HF.
 
-I have my edited versions of the 2 files in a zip.  Repalce your files with these and set teh #define as desired.
+I have my edited versions of the 2 files in a zip.  Replace your files with these and set teh #define as desired.
