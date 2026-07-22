@@ -7,6 +7,12 @@
 #include "../hl2ioboard.h"
 #include "../i2c_registers.h"
 
+#define DUAL_BAND_XVTR  // define this for the K7MDL custom 6M+2M dual band transverter box.  
+// Uses GPIO12 (switched 5V), GPIO10_out5 for PTT, Out1 for Band_6M enable, Out2 for Band_2M enable. 
+// Switched 5V is from a 74L05 so 100ma max. The xvtr box has 2x 5V relays at 33ma each.  They use TTL input control.
+// All other bands the GPIOs are set to 0.
+// When not defined, there are 4 band outputs and ptt.  Switched 5V is off.
+
 // These are the major and minor version numbers for firmware. You must set these.
 uint8_t firmware_version_major=1;
 uint8_t firmware_version_minor=3;
@@ -92,59 +98,89 @@ rx_band = tx_band;   // temp until SDR apps write to one or more o fhte 12possib
 				band = tx_band;
 
 			switch (band) {		// Set some GPIO pins according to the band.
-			case BAND_6:
-				Split_IF();  //  REG_RF_INPUTS = 1 for Split IF
-				gpio_put(GPIO16_Out1, 0);
-				gpio_put(GPIO19_Out2, 0);
-				gpio_put(GPIO20_Out3, 0);
-				gpio_put(GPIO11_Out4, 0);
-				Xvtr_PTT(current_is_rx);
-				break;
-			case BAND_2:
-				Split_IF();  //  REG_RF_INPUTS = 1 for Split IF
-				gpio_put(GPIO16_Out1, 1);
-				gpio_put(GPIO19_Out2, 0);
-				gpio_put(GPIO20_Out3, 1);
-				gpio_put(GPIO11_Out4, 1);
-				Xvtr_PTT(current_is_rx);
-				break;
-			case BAND_125cm:
-				Split_IF();  //  REG_RF_INPUTS = 1 for Split IF
-				gpio_put(GPIO16_Out1, 0);
-				gpio_put(GPIO19_Out2, 0);
-				gpio_put(GPIO20_Out3, 1);
-				gpio_put(GPIO11_Out4, 1);
-				Xvtr_PTT(current_is_rx);
-				break;
-			case BAND_70cm:
-				Split_IF();  //  REG_RF_INPUTS = 1 for Split IF
-				gpio_put(GPIO16_Out1, 1);
-				gpio_put(GPIO19_Out2, 1);
-				gpio_put(GPIO20_Out3, 0);
-				gpio_put(GPIO11_Out4, 1);
-				Xvtr_PTT(current_is_rx);
-				break;
-			case BAND_33cm:
-				Split_IF();  //  REG_RF_INPUTS = 1 for Split IF
-				gpio_put(GPIO16_Out1, 0);
-				gpio_put(GPIO19_Out2, 1);
-				gpio_put(GPIO20_Out3, 0);
-				gpio_put(GPIO11_Out4, 1);
-				Xvtr_PTT(current_is_rx);
-				break;
-			case BAND_23cm:
-				Split_IF();  //  REG_RF_INPUTS = 1 for Split IF
-				gpio_put(GPIO16_Out1, 1);
-				gpio_put(GPIO19_Out2, 0);
-				gpio_put(GPIO20_Out3, 0);
-				gpio_put(GPIO11_Out4, 1);
-				Xvtr_PTT(current_is_rx);
-				break;
-			default: 
-			    ;
-				// This includes band zero (reset)
-			// for now do not mess with HF bands. Permits control form Quisk and Thetis.  
-				//Common_IF();  //  REG_RF_INPUTS = 0 for Common IF
+			#ifndef DUAL_BAND_XVTR   // normal K3 emulation for VHF bands  Sw5 is not used or wired
+				case BAND_6:
+					Split_IF();  //  REG_RF_INPUTS = 1 for Split IF
+					gpio_put(GPIO16_Out1, 0);
+					gpio_put(GPIO19_Out2, 0);
+					gpio_put(GPIO20_Out3, 0);
+					gpio_put(GPIO11_Out4, 0);
+					Xvtr_PTT(current_is_rx);
+					break;
+				case BAND_2:
+					Split_IF();  //  REG_RF_INPUTS = 1 for Split IF
+					gpio_put(GPIO16_Out1, 1);
+					gpio_put(GPIO19_Out2, 0);
+					gpio_put(GPIO20_Out3, 1);
+					gpio_put(GPIO11_Out4, 1);
+					Xvtr_PTT(current_is_rx);
+					break;				
+				case BAND_125cm:
+					Split_IF();  //  REG_RF_INPUTS = 1 for Split IF
+					gpio_put(GPIO16_Out1, 0);
+					gpio_put(GPIO19_Out2, 0);
+					gpio_put(GPIO20_Out3, 1);
+					gpio_put(GPIO11_Out4, 1);
+					Xvtr_PTT(current_is_rx);
+					break;
+				case BAND_70cm:
+					Split_IF();  //  REG_RF_INPUTS = 1 for Split IF
+					gpio_put(GPIO16_Out1, 1);
+					gpio_put(GPIO19_Out2, 1);
+					gpio_put(GPIO20_Out3, 0);
+					gpio_put(GPIO11_Out4, 1);
+					Xvtr_PTT(current_is_rx);
+					break;
+				case BAND_33cm:
+					Split_IF();  //  REG_RF_INPUTS = 1 for Split IF
+					gpio_put(GPIO16_Out1, 0);
+					gpio_put(GPIO19_Out2, 1);
+					gpio_put(GPIO20_Out3, 0);
+					gpio_put(GPIO11_Out4, 1);
+					Xvtr_PTT(current_is_rx);
+					break;
+				case BAND_23cm:
+					Split_IF();  //  REG_RF_INPUTS = 1 for Split IF
+					gpio_put(GPIO16_Out1, 1);
+					gpio_put(GPIO19_Out2, 0);
+					gpio_put(GPIO20_Out3, 0);
+					gpio_put(GPIO11_Out4, 1);
+					Xvtr_PTT(current_is_rx);
+					break;
+				default: 
+					;
+					// This includes band zero (reset)
+				// for now do not mess with HF bands. Permits control form Quisk and Thetis.  
+					//Common_IF();  //  REG_RF_INPUTS = 0 for Common IF
+			#else  // For my dual band Xvtr.  Sw5 is used to provide relay power. Out1 and 2 control the relays.
+				case BAND_6:
+					Split_IF();  //  REG_RF_INPUTS = 1 for Split IF
+					gpio_put(GPIO12_Sw5,  1);  // Power for xvtr relays.  About 33ma max required, 100ma available.
+					gpio_put(GPIO16_Out1, 1);  // turn on 6M relay (33ma)
+					gpio_put(GPIO19_Out2, 0);
+					gpio_put(GPIO20_Out3, 0);
+					gpio_put(GPIO11_Out4, 0);
+					Xvtr_PTT(current_is_rx);   // pass though PTT
+					break;
+				case BAND_2:
+					Split_IF();  //  REG_RF_INPUTS = 1 for Split IF
+					gpio_put(GPIO12_Sw5,  1);  // Power for xvtr relays.  About 33ma max required, 100ma available.
+					gpio_put(GPIO16_Out1, 0);
+					gpio_put(GPIO19_Out2, 1);
+					gpio_put(GPIO20_Out3, 0);
+					gpio_put(GPIO11_Out4, 0);
+					Xvtr_PTT(current_is_rx);
+					break;	
+				default: 
+					Common_IF();  //  REG_RF_INPUTS = 0 for Common  IF - for non-VHF bands
+					gpio_put(GPIO12_Sw5,  0);  // Power OFF xvtr relays.  About 33ma max required, 100ma available.
+					gpio_put(GPIO16_Out1, 0);
+					gpio_put(GPIO19_Out2, 0);
+					gpio_put(GPIO20_Out3, 0);
+					gpio_put(GPIO11_Out4, 0);
+					Xvtr_PTT(current_is_rx);
+					break;							
+			#endif
 			}
 		}
 	}
