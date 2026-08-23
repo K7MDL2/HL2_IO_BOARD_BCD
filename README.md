@@ -3,6 +3,10 @@ BCD and PTT outputs for the HL2 IO board designed by N2ADR.  Derived from the N2
 
 Original source at https://github.com/jimahlstrom/HL2IOBoard
 
+> [!NOTE]
+> Latest changes are in my version of zl2te_arduino.ino and has more output pattern options than the older sdk-built main.c.
+
+
 In my main.c here I produce 4-line BCD patterns derived from the TX frequency sent to the IO board via i2c from a compatible SDR app. It also monitors EXTTR on the HL2 IO header and repeats it through, buffered by one of the transistors on board. All 5 signals I wire to the DB9 to my Q5 5-band transverter (144, 222, 432, 903, 1296), or external band decoder (see my other projects).
 
 I have the compiled UF2 file so you do not need to compile this.  Just drop it into the Boot file manager window as normal for Pico uploads.
@@ -23,7 +27,7 @@ https://github.com/K7MDL2/HL2_IO_BOARD_BCD/wiki/Thetis-Configuration-for-Transve
 
 On the original repo there are several user solutions added since I built this C version.  
 
-One of then is ZL2TE_Arduino.  As of Feb 2026 I was able to compile and run with 1 change to a header file to fix a path to an include file.  I used Arduino IDE v2.3.7 and the current ARduino-Pico board package which includes Pico-SDK 2.2.0.
+One of them is ZL2TE_Arduino.  As of Feb 2026 I was able to compile and run with 1 change to a header file to fix a path to an include file.  I used Arduino IDE v2.3.7 and the current ARduino-Pico board package which includes Pico-SDK 2.2.0.
 
 In the file ioboard.h replace this line 
 #include <pico/i2c_slave.h>
